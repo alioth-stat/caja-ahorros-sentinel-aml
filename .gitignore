@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+*.db
+*.db-journal
+.qvac/
+*.env
+.env
+compliance_case_log.log

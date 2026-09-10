@@ -1,0 +1,4 @@
+tetherto.qvac_sdk
+pytest
+fastapi
+uvicorn

@@ -16,6 +16,17 @@ interface Strings {
   statsPending: string
   statsFrozen: string
   frozenBanner: (accountId: string, reason: string, confidencePct: number) => string
+  detail: {
+    title: string
+    fields: {
+      account: string; amount: string; type: string; payee: string; branchChannel: string
+      heuristic: string; verdict: string; confidence: string; tier: string; reasoning: string; created: string
+    }
+    tierLabels: Record<'review' | 'critical', string>
+    actions: { freeze: string; skip: string; contact: string; escalate: string }
+    actionTaken: (action: string) => string
+    actionError: string
+  }
   panel: {
     title: string
     close: string
@@ -48,6 +59,18 @@ export const STRINGS: Record<Lang, Strings> = {
     statsFrozen: 'Cuentas congeladas',
     frozenBanner: (accountId, reason, confidencePct) =>
       `🚨 Cuenta ${accountId} congelada automáticamente — ${reason} (${confidencePct}% de confianza). Notificado a un analista.`,
+    detail: {
+      title: 'Detalle de la alerta',
+      fields: {
+        account: 'Cuenta', amount: 'Monto', type: 'Tipo', payee: 'Beneficiario', branchChannel: 'Sucursal / canal',
+        heuristic: 'Heurístico', verdict: 'Veredicto', confidence: 'Confianza', tier: 'Nivel', reasoning: 'Motivo (QVAC)',
+        created: 'Detectada',
+      },
+      tierLabels: { review: 'Revisión manual', critical: 'Crítico (congelado automáticamente)' },
+      actions: { freeze: 'Congelar cuenta', skip: 'Descartar', contact: 'Contactar cliente', escalate: 'Escalar alarma' },
+      actionTaken: (action) => `Acción registrada: ${action}. Ver compliance_case_log.log para el registro completo.`,
+      actionError: 'No se pudo registrar la acción. Verifica que el backend esté corriendo.',
+    },
     panel: {
       title: 'Transparencia del sistema',
       close: 'Cerrar',
@@ -86,6 +109,18 @@ export const STRINGS: Record<Lang, Strings> = {
     statsFrozen: 'Frozen accounts',
     frozenBanner: (accountId, reason, confidencePct) =>
       `🚨 Account ${accountId} automatically frozen — ${reason} (${confidencePct}% confidence). An analyst has been notified.`,
+    detail: {
+      title: 'Alert detail',
+      fields: {
+        account: 'Account', amount: 'Amount', type: 'Type', payee: 'Payee', branchChannel: 'Branch / channel',
+        heuristic: 'Heuristic', verdict: 'Verdict', confidence: 'Confidence', tier: 'Tier', reasoning: 'Reasoning (QVAC)',
+        created: 'Detected',
+      },
+      tierLabels: { review: 'Manual review', critical: 'Critical (auto-frozen)' },
+      actions: { freeze: 'Freeze account', skip: 'Skip', contact: 'Contact customer', escalate: 'Raise alarm' },
+      actionTaken: (action) => `Action recorded: ${action}. See compliance_case_log.log for the full record.`,
+      actionError: "Couldn't record the action. Check that the backend is running.",
+    },
     panel: {
       title: 'System transparency',
       close: 'Close',

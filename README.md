@@ -98,6 +98,15 @@ interfaz; el contenido del modelo (veredicto, motivo) siempre queda en español.
 Un botón abre un panel de **Transparencia y glosario**: explica el pipeline paso a paso y
 define cada término (estructuración, layering, AML, UAF, etc.) en pantalla.
 
+Click en cualquier fila de la tabla de alertas confirmadas abre su **detalle completo**
+(motivo íntegro del veredicto de QVAC, sin truncar, más los demás campos de la transacción) y
+4 botones de acción de analista: **Congelar cuenta** (usa el mismo mecanismo que el
+congelamiento automático — bloquea transacciones futuras de esa cuenta de inmediato),
+**Descartar**, **Contactar cliente**, **Escalar alarma**. Cada acción se registra en
+`compliance_case_log.log` (`POST /api/alerts/{id}/action`) y en `alerts.analyst_action`. El
+stream de transacciones en vivo no es clickeable por diseño — solo tiene sentido revisar el
+detalle de algo que QVAC ya confirmó como sospechoso, no de cada transacción normal del stream.
+
 ## Instalación
 
 ```bash

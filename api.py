@@ -7,11 +7,19 @@ continuously.
 import asyncio
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
+import compliance_sink
 import db
 import pipeline
+
+_VALID_ACTIONS = {"freeze", "skip", "contact", "escalate"}
+
+
+class AlertAction(BaseModel):
+    action: str
 
 conn = db.init_db()
 
@@ -51,3 +59,18 @@ def frozen(limit: int = 50):
 @app.get("/api/stats")
 def stats():
     return {**db.get_stats(conn), **pipeline.get_throughput()}
+
+
+@app.post("/api/alerts/{alert_id}/action")
+def act_on_alert(alert_id: int, body: AlertAction):
+    if body.action not in _VALID_ACTIONS:
+        raise HTTPException(400, f"invalid action: {body.action!r}, must be one of {sorted(_VALID_ACTIONS)}")
+    alert = db.get_alert(conn, alert_id)
+    if alert is None:
+        raise HTTPException(404, "alert not found")
+
+    if body.action == "freeze":
+        db.freeze_account(conn, alert["account_id"], alert["verdict"], alert["confidence"], alert_id)
+    db.set_alert_action(conn, alert_id, body.action)
+    compliance_sink.append_action(alert, body.action)
+    return db.get_alert(conn, alert_id)

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import type { Alert } from '@/api'
 import { getAlerts, getFeed, getFrozen, getStats } from '@/api'
+import { AlertDetail } from '@/components/AlertDetail'
 import { Background } from '@/components/Background'
 import { GlassPanel } from '@/components/GlassPanel'
 import { Badge } from '@/components/ui/badge'
@@ -56,6 +58,7 @@ function App() {
 
   const seenFrozenIds = useRef<Set<string>>(new Set())
   const [banner, setBanner] = useState<{ accountId: string; reason: string; confidencePct: number } | null>(null)
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
 
   useEffect(() => {
     if (!frozen) return
@@ -83,6 +86,7 @@ function App() {
     <>
       <Background />
       <VisibilityPanel open={visibilityOpen} onClose={() => setVisibilityOpen(false)} lang={lang} />
+      <AlertDetail alert={selectedAlert} onClose={() => setSelectedAlert(null)} onUpdated={setSelectedAlert} lang={lang} />
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 p-6 md:p-10">
         <header className="flex items-start justify-between gap-4">
           <div>
@@ -210,7 +214,11 @@ function App() {
                   </TableRow>
                 )}
                 {alerts?.map((a) => (
-                  <TableRow key={a.id}>
+                  <TableRow
+                    key={a.id}
+                    onClick={() => setSelectedAlert(a)}
+                    className="cursor-pointer hover:bg-accent/50"
+                  >
                     <TableCell className="align-top whitespace-nowrap">{formatTime(a.created_at)}</TableCell>
                     <TableCell className="align-top" title={a.account_id}>{a.account_id}</TableCell>
                     <TableCell className="align-top whitespace-nowrap">{formatAmount(a.amount)}</TableCell>
@@ -220,6 +228,9 @@ function App() {
                         {t.statusLabels[a.verdict] ?? a.verdict}
                       </Badge>
                       <span className="ml-1 text-xs text-muted-foreground">{Math.round(a.confidence * 100)}%</span>
+                      {a.analyst_action && (
+                        <Badge variant="outline" className="ml-1">{a.analyst_action}</Badge>
+                      )}
                     </TableCell>
                     <TableCell className="max-w-80 min-w-48 align-top" title={a.reasoning}>
                       <p className="line-clamp-2 whitespace-normal text-muted-foreground">{a.reasoning}</p>

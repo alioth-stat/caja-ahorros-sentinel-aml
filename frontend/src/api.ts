@@ -13,7 +13,10 @@ export interface Alert {
   reasoning: string
   tier: 'review' | 'critical'
   created_at: string
+  analyst_action: string | null
 }
+
+export type AnalystAction = 'freeze' | 'skip' | 'contact' | 'escalate'
 
 export interface FeedItem {
   id: number
@@ -69,4 +72,12 @@ export function getFrozen(limit = 50): Promise<FrozenAccount[]> {
 
 export function getStats(): Promise<Stats> {
   return fetch('/api/stats').then(unwrap<Stats>)
+}
+
+export function postAlertAction(alertId: number, action: AnalystAction): Promise<Alert> {
+  return fetch(`/api/alerts/${alertId}/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action }),
+  }).then(unwrap<Alert>)
 }

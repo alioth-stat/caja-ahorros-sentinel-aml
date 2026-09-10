@@ -42,3 +42,19 @@ def append_alert(tx, candidate: dict, verdict: dict) -> None:
     }
     with open(_LOG_PATH, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def append_action(alert: dict, action: str) -> None:
+    """An analyst acted on an already-confirmed alert from the detail view
+    (freeze/skip/contact/escalate) -- logged the same way as the original
+    alert so a real case system sees the full lifecycle, not just the open."""
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "case": {
+            "description": f"Sentinel-AML: analyst action '{action}' on alert #{alert['id']}",
+            "tags": ["aml", "sentinel-aml", "analyst-action", action],
+        },
+        "data": {"alert_id": alert["id"], "account_id": alert["account_id"], "action": action},
+    }
+    with open(_LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")

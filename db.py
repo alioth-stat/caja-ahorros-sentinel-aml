@@ -27,7 +27,8 @@ def init_db(path: str = "sentinel_aml.db") -> sqlite3.Connection:
             confidence REAL,
             reasoning TEXT,
             tier TEXT,
-            created_at TEXT
+            created_at TEXT,
+            analyst_action TEXT
         )
     """)
     conn.execute("""
@@ -64,6 +65,16 @@ def insert_alert(conn: sqlite3.Connection, tx, candidate: dict, verdict: dict, t
 def get_recent_alerts(conn: sqlite3.Connection, limit: int = 50) -> list[dict]:
     rows = conn.execute("SELECT * FROM alerts ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_alert(conn: sqlite3.Connection, alert_id: int) -> dict | None:
+    row = conn.execute("SELECT * FROM alerts WHERE id = ?", (alert_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def set_alert_action(conn: sqlite3.Connection, alert_id: int, action: str) -> None:
+    conn.execute("UPDATE alerts SET analyst_action = ? WHERE id = ?", (action, alert_id))
+    conn.commit()
 
 
 def get_stats(conn: sqlite3.Connection) -> dict:
